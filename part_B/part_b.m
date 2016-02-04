@@ -18,7 +18,7 @@ total_duration = 2;      % total duration time (sec)
 phonem_duration = 0.5;   % phonem duration time (sec)
 
 s = 30;                  % wide bandwidth 2*sk = 60Hz
-A = 5000;                % gain
+A = 5;                   % gain
 
 % Average formant frequencies for the vowels of American English.
 F = [570, 840,  2410;    %  /AO/
@@ -26,29 +26,19 @@ F = [570, 840,  2410;    %  /AO/
      300, 870,  2240;    %  /UH/
      530, 1840, 2480];   %  /EH/
 
-pitchPeriod = [8e-3, 4e-3];      % pitch period
+pitchPeriod = [4e-3, 8e-3];      % pitch period
 
 %% B1) 
 for k = 1:length(pitchPeriod)
     
     Tp = pitchPeriod(k);
     Np = Tp*Fs;
-    
+        
     for l = 1 : 4
         
         f = F(l,:);              % formant frequencies for each vowel
 
         %%  Voiced excitation p[n]
-%         n = (0:1023);
-%         p = zeros(1, 1024);
-%         for i = 1 : 80 : length(p)
-%             p(i) = 0.9999^i;
-%         end
-%         figure(1);
-%         plot(n,p);
-%         title('Voiced Excitation (time-domain)');
-%         xlabel('n');
-%         ylabel('p[n]');
 
         p_num = (1);
         p_den = zeros(1, 81);
@@ -59,7 +49,7 @@ for k = 1:length(pitchPeriod)
             fvtool(p_num, p_den);
         end
         
-        [p_sig, Np] = impz(p_num, p_den);
+        [p_sig, ~] = impz(p_num, p_den);
         
         %% Glotal pulse g[n]
         
@@ -109,10 +99,16 @@ for k = 1:length(pitchPeriod)
         h2 = conv(h1, v_sig);
         h3 = conv(h2, r);
         
-        s_sig = A.*h3;
-        plot(s_sig);
+        s_sig = A*h3;
+
+        if l == 1 
+            speech_signal = s_sig;
+        else
+            speech_signal = [speech_signal; s_sig];
+        end
         
-        break;
     end
-    break;
+    
+    filename = char(strcat('pitch_', int2str(Np), '.wav'));
+    audiowrite(filename, speech_signal, Fs);
 end
