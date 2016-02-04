@@ -11,34 +11,36 @@
 clear; clc;
 
 %% PART B: SIMPLE SYSTEM OF SPEECH PRODUCTION
+%%
 
 % parameters setup;
-Fs = 10e3; Ts = 1/Fs;    % sampling frequency and period
-total_duration = 2;      % total duration time (sec)
-phonem_duration = 0.5;   % phonem duration time (sec)
+Fs = 10e3; Ts = 1/Fs;            % sampling frequency and period
+total_duration = 2;              % total duration time (sec)
+phonem_duration = 0.5;           % phonem duration time (sec)
 
-s = 30;                  % wide bandwidth 2*sk = 60Hz
-A = 5;                   % gain
+s = 30;                          % wide bandwidth 2*sk = 60Hz
+A = 5;                           % gain
 
 % Average formant frequencies for the vowels of American English.
-F = [570, 840,  2410;    %  /AO/
-     270, 2290, 3010;    %  /IY/
-     300, 870,  2240;    %  /UH/
-     530, 1840, 2480];   %  /EH/
+F = [570, 840,  2410;            %  /AO/
+     270, 2290, 3010;            %  /IY/
+     300, 870,  2240;            %  /UH/
+     530, 1840, 2480];           %  /EH/
 
 pitchPeriod = [4e-3, 8e-3];      % pitch period
 
-%% B1) 
-for k = 1:length(pitchPeriod)
+%% B6-B10 Create speech signal for given pitch period
+%%
+for k = 1:length(pitchPeriod)    % fro each pitch period 
     
     Tp = pitchPeriod(k);
     Np = Tp*Fs;
         
-    for l = 1 : 4
+    for l = 1 : 4                % for each vowel 
         
-        f = F(l,:);              % formant frequencies for each vowel
+        f = F(l,:);              % get formant frequencies for each vowel
 
-        %%  Voiced excitation p[n]
+        %%  B1) Voiced excitation p[n]
 
         p_num = (1);
         p_den = zeros(1, 81);
@@ -51,7 +53,7 @@ for k = 1:length(pitchPeriod)
         
         [p_sig, ~] = impz(p_num, p_den);
         
-        %% Glotal pulse g[n]
+        %%  B2) Glotal pulse g[n]
         
         Ng = (0:39);
         g_sig = zeros(1, 40);
@@ -67,7 +69,7 @@ for k = 1:length(pitchPeriod)
         end
 
 
-        %% Vocal tract impulse response v[n]
+        %% B3) Vocal tract impulse response v[n]
 
         v_num = (1);
         v_den = (1);
@@ -83,7 +85,7 @@ for k = 1:length(pitchPeriod)
         
         [v_sig, Nv] = impz(v_num, v_den);
         
-        %% Radiation load r[n]
+        %% B4) Radiation load r[n]
 
         r = zeros(1,10);
         r(1) = 1;
@@ -93,7 +95,7 @@ for k = 1:length(pitchPeriod)
             fvtool(r);
         end
         
-        %% Create vowel signal s[n] via convolution s[n] = A(p[n]*g[n]*v[n]*r[n])
+        %% B5) Create vowel signal s[n] via convolution s[n] = A(p[n]*g[n]*v[n]*r[n])
         
         h1 = conv(p_sig, g_sig);
         h2 = conv(h1, v_sig);
