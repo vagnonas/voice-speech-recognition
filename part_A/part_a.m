@@ -1,9 +1,10 @@
-%% DEPARTMENT OF ELECTRICAL AND COMPUTER ENGINEERING, 
-%%             UNIVERSITY OF THESSALY
+%%        DEPARTMENT OF ELECTRICAL AND COMPUTER ENGINEERING, 
+%%                  UNIVERSITY OF THESSALY
 %%
-%%        HY692: SPEECH AND AUDIO PROCESSING
+%%           CS692: SPEECH AND AUDIO PROCESSING
 %%
 %% INSTRUCTOR: GERASIMOS POTAMIANOS (gpotamianos@inf.uth.gr)
+%%
 %% PROJECT BY: NONAS EVANGELOS (vagnonas@gmail.com),
 %%             CHATZIGEORGIOU CHRYSOSTOMOS (hrhatzig@gmail.com)
 %%
@@ -12,7 +13,8 @@ clear; clc;
 
 %% PART A: BASIC ALGORITHMS FOR VOCAL PARAMETERS ESTIMATION
 
-figure_counter = 1;
+figure_counter = 1;   % counter for figure ploting
+RecordAudio = 1;      % change to 0 to read an existing wav file.
 
 %% A1) Create a recorder object to record speaker's name.
 %%
@@ -24,17 +26,19 @@ bps = 8;        % bits per sample
 ca = 1;         % chanel audio (mono)
 rt = 3;         % record time is 3 seconds
 
-% recorder = audiorecorder(Fs,bps,ca);
-% 
-% disp('Start speaking.')
-% recordblocking(recorder, rt);
-% disp('End of Recording.');
-% 
-% x = getaudiodata(recorder);
-% audiowrite('./myname.wav',x,Fs);
+if RecordAudio == 1
+    recorder = audiorecorder(Fs,bps,ca);
 
-[x, ~] = audioread('./myname.wav');
+    disp('Start speaking.')
+    recordblocking(recorder, rt);
+    disp('End of Recording.');
 
+    x = getaudiodata(recorder);
+    audiowrite('./myname.wav',x,Fs);
+else
+    disp('Getting audio data from existing file...');
+    [x, ~] = audioread('./myname.wav');
+end
 disp('Press any key to continue...');
 pause;
 
@@ -45,26 +49,26 @@ disp('A2) Spectrogram using Hamming short-time and longer-time window');
 
 fft_size = 4096;
 
-wl = 10e-3;
-wo = 5e-3;
+wl = 10e-3;           % window time duration
+wo = 5e-3;            % window time overlap
 
-L = floor(wl * Fs);
-overlap = (wo/wl)*L;
+L = floor(wl * Fs);   % window length
+overlap = (wo/wl)*L;  % window overlap
 
-% plot spectrogram of window length L = 10msec
+% plot spectrogram of short-time window
 figure(figure_counter);
 spectrogram(x, hamming(L), L-overlap, fft_size, 'yaxis');
 title('Spectrogram using short-time Hamming window');
 
 figure_counter = figure_counter + 1;
 
-wl = 100e-3;
-wo = 5e-3;
+wl = 100e-3;          % window time duration
+wo = 5e-3;            % window time overlap
 
-L = floor(wl * Fs);
-overlap = (wo/wl)*L;
+L = floor(wl * Fs);   % window length
+overlap = (wo/wl)*L;  % window overlap
 
-% plot spectrogram of window length L = 100msec
+% plot spectrogram of longer-time window
 figure(figure_counter);
 spectrogram(x,hamming(L),overlap);
 title('Spectrogram using longer-time Hamming window');

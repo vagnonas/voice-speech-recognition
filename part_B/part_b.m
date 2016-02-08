@@ -28,7 +28,7 @@ F = [570, 840,  2410;            %  /AO/
      300, 870,  2240;            %  /UH/
      530, 1840, 2480];           %  /EH/
 
-pitchPeriod = [4e-3, 8e-3];      % pitch period
+pitchPeriod = [8e-3, 4e-3];      % pitch period
 
 %% B6-B10 Create speech signal for given pitch period
 %%
@@ -44,7 +44,7 @@ for k = 1:length(pitchPeriod)    % fro each pitch period
         %%  B1) Voiced excitation p[n]
 
         p_num = (1);
-        p_den = zeros(1, 81);
+        p_den = zeros(1, Np+1);
         p_den(1) = 1;
         p_den(81) = -0.9999;
 
