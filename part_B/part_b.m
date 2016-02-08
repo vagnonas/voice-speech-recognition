@@ -118,9 +118,6 @@ for k = 1:length(pitchPeriod)    % fro each pitch period
     filename = char(strcat('pitch_', int2str(Np), '.wav'));
     audiowrite(filename, speech_signal, Fs);
     
-    % plot speech signal
-    figure;
-    plot(speech_signal);
-    figure_title = sprintf('Speech signal for Np = %d', Np);
-    title(figure_title);
+    % plot speech signal   
+    wvtool(speech_signal);
 end
