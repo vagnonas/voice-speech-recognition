@@ -2,4 +2,6 @@
 ./old/*
 ./*~
 ./part_A/*~
+./part_A/*.wav
 ./part_B/*~
+./part_B/*.wav
