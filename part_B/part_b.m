@@ -1,9 +1,10 @@
-%% DEPARTMENT OF ELECTRICAL AND COMPUTER ENGINEERING, 
-%%             UNIVERSITY OF THESSALY
+%%        DEPARTMENT OF ELECTRICAL AND COMPUTER ENGINEERING, 
+%%                  UNIVERSITY OF THESSALY
 %%
-%%        HY692: SPEECH AND AUDIO PROCESSING
+%%           CS692: SPEECH AND AUDIO PROCESSING
 %%
 %% INSTRUCTOR: GERASIMOS POTAMIANOS (gpotamianos@inf.uth.gr)
+%%
 %% PROJECT BY: NONAS EVANGELOS (vagnonas@gmail.com),
 %%             CHATZIGEORGIOU CHRYSOSTOMOS (hrhatzig@gmail.com)
 %%
@@ -13,7 +14,7 @@ clear; clc;
 %% PART B: SIMPLE SYSTEM OF SPEECH PRODUCTION
 %%
 
-% parameters setup;
+% Parameters setup.
 Fs = 10e3; Ts = 1/Fs;            % sampling frequency and period
 total_duration = 2;              % total duration time (sec)
 phonem_duration = 0.5;           % phonem duration time (sec)
@@ -103,6 +104,8 @@ for k = 1:length(pitchPeriod)    % fro each pitch period
         
         s_sig = A*h3;
 
+       %% Append vowels to create the desired speech signal
+       
         if l == 1 
             speech_signal = s_sig;
         else
@@ -111,6 +114,13 @@ for k = 1:length(pitchPeriod)    % fro each pitch period
         
     end
     
+    % write speech signal to output file
     filename = char(strcat('pitch_', int2str(Np), '.wav'));
     audiowrite(filename, speech_signal, Fs);
+    
+    % plot speech signal
+    figure;
+    plot(speech_signal);
+    figure_title = sprintf('Speech signal for Np = %d', Np);
+    title(figure_title);
 end

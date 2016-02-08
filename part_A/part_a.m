@@ -17,22 +17,31 @@ figure_counter = 1;
 %% A1) Create a recorder object to record speaker's name.
 %%
 
+disp('A1) Recording...');
+
 Fs = 16e3;      % sample rate
 bps = 8;        % bits per sample
 ca = 1;         % chanel audio (mono)
 rt = 3;         % record time is 3 seconds
 
-recorder = audiorecorder(Fs,bps,ca);
+% recorder = audiorecorder(Fs,bps,ca);
+% 
+% disp('Start speaking.')
+% recordblocking(recorder, rt);
+% disp('End of Recording.');
+% 
+% x = getaudiodata(recorder);
+% audiowrite('./myname.wav',x,Fs);
 
-disp('Start speaking.')
-recordblocking(recorder, rt);
-disp('End of Recording.');
+[x, ~] = audioread('./myname.wav');
 
-x = getaudiodata(recorder);
-audiowrite('./myname.wav',x,Fs);
+disp('Press any key to continue...');
+pause;
 
 %% A2) Spectrogram using Hamming short-time and longer-time window 
 %%
+
+disp('A2) Spectrogram using Hamming short-time and longer-time window');
 
 fft_size = 4096;
 
@@ -41,11 +50,6 @@ wo = 5e-3;
 
 L = floor(wl * Fs);
 overlap = (wo/wl)*L;
-
-% % plot hamming window
-% figure(figure_counter);
-% wvtool(hamming(L));
-% figure_counter = figure_counter + 1;
 
 % plot spectrogram of window length L = 10msec
 figure(figure_counter);
@@ -67,19 +71,24 @@ title('Spectrogram using longer-time Hamming window');
 
 figure_counter = figure_counter + 1;
 
-%% A3) voiced/unvoived speech segments estimation
+disp('Press any key to continue...');
+pause;
+
+%% A3) Voiced/unvoived speech segments estimation
 %%
 
-wl = 30e-3; % window time duration
-wo = 15e-3; % window time overlap
+disp('A3) Voiced/unvoived speech segments estimation');
+
+wl = 30e-3;          % window time duration
+wo = 15e-3;          % window time overlap
 
 L = floor(wl * Fs);  % window length
 overlap = (wo/wl)*L; % window overlap
 
-w = hamming(L); % define hamming window of length L
+w = hamming(L);      % define hamming window of length L
 
-Eth = 1.5; % define short-time energy threshold
-Zth = 0.1; % define zero-crossing rate threshold
+Eth = 1.5;           % define short-time energy threshold
+Zth = 0.1;           % define zero-crossing rate threshold
 
 step = (L-overlap);
 stop = (length(x)-L);
@@ -144,25 +153,36 @@ title('Decision levels');
 
 figure_counter = figure_counter + 1;
 
+disp('Press any key to continue...');
+pause;
+
 %% A4) Pitch period estimation with autocorrelation values & cepstrum
 %%
+
+disp('A4) Pitch period estimation with autocorrelation values & cepstrum');
 
 % Pitch period estimation with autocorrelation signal.
 
 R = zeros(1, length(segment));   % auto-correlation signal
 ppr = zeros(1, length(segment)); % pitch period in each segment
 
+prit_segment = 1;
 for k = 1 : step : stop
     xshort = x(k:k+L-1);
     
     if segment(k) == 2   % if segment is voiced
         r = autocorrelation(xshort, w);
         pp = pitch_period_estimation(r);
-%         figure(figure_counter);
-%         plot(r);
-%         title('Autocorrelation signal for a specific segment');
-%         figure_counter = figure_counter + 1;
-%         
+        
+        % plot autocorrelation of the first voiced segment
+        if prit_segment == 1
+            figure(figure_counter);
+            plot(r);
+            title('Autocorrelation signal for a specific segment');
+            figure_counter = figure_counter + 1;
+            prit_segment = 0;
+        end
+        
         R(k:k+L-1) = r;
         ppr(k:k+L-1) = pp;
     end
@@ -190,6 +210,7 @@ figure_counter = figure_counter + 1;
 cep = zeros(1, length(segment)); % cepstrum signal
 ppc = zeros(1, length(segment)); % pitch period in each segment
 
+prit_segment = 1;
 offset = 50; len = 200;
 for k = 1 : step : stop
     xshort = x(k:k+L-1);
@@ -197,11 +218,16 @@ for k = 1 : step : stop
     if segment(k) == 2   % if segment is voiced
         c = cepstrum(xshort);
         cep(k:k+L-1) = c;
-%         figure(figure_counter);
-%         plot(c);
-%         title('Cepstrum of a specific voiced segment');
-%         figure_counter = figure_counter + 1;
-
+        
+        % plot cepstrum of the first voiced segment
+        if prit_segment == 1
+            figure(figure_counter);
+            plot(c);
+            title('Cepstrum of a specific voiced segment');
+            figure_counter = figure_counter + 1;
+            prit_segment = 0;
+        end
+        
         [~, ipos] = max(c(offset:len));
         pp = offset+ipos;      
         ppc(k:k+L-1) = pp;
@@ -227,7 +253,6 @@ title('Pitch period estimated with cepstrum method');
 
 figure_counter = figure_counter + 1;
 
-
 % plot speech signals, pitch period estimated with autocorrelation and
 % cepstrum
 
@@ -248,11 +273,16 @@ title('Pitch period of voiced segments using cepstrum');
 
 figure_counter = figure_counter + 1;
 
+disp('Press any key to continue...');
+pause;
+
 %% A5) Linear Prediction
 %%
 
-S = zeros(2, L); % S(1, :) = unvoiced segment,
-                 % S(2, :) = voiced segmrnt
+disp('A5) Linear prediction');
+
+S = zeros(2, L); % S(1, :) is the unvoiced segment,
+                 % S(2, :) is the voiced segmrnt
 
 % find first unvoiced segment
 for k = 1 : step : stop    
@@ -271,27 +301,46 @@ for k = 1 : step : stop
 end
 
 % linear prediction
-for p = 8 : 4 : 16  % for each filter order
-    for k = 1:2     % for voiced/unvoiced segments
+for p = 8 : 4 : 16         % for each filter order
+    fprintf(' order p = %d\n', p);
+    for k = 1:2            % for voiced/unvoiced segments
         sn = S(k,:);
     
         rn = autocorrelation(sn, w);     % segment autocorrelation
         [M, rhsvec] = toeplitz(rn, p);   % toplitz matrix & rhs vector
         a = M\rhsvec;                    % system solution
-        e = lpc_error(sn, w, a, p)       % prediction error
+        e = lpc_error(sn, w, a, p);      % prediction error
         
-        % plot ploes on Z-plane
-        figure(figure_counter);
-        zplane([], a);
-        figure_counter = figure_counter + 1;
+        if k == 1 % for unvoiced segment
+            fprintf('   unvoiced segment prediction error = %f\n', e);
+        else      % for voiced segment
+            fprintf('   voiced segment prediction error = %f\n', e);
+        end
         
-        % plot all-pole trasfer function magnitude
+        % plot all-pole trasfer function magnitude and roots on Z-plane
         [b,a] = zp2tf([],a,1);
-        fvtool(b,a)
+        fvtool(b,a);
         
         % plot signal segment dft
         figure(figure_counter);
         plot(abs(fft(sn)));
+        if k == 1 % for unvoiced segment
+            title('Unvoiced segment DFT');
+        else      % for voiced segment
+            title('Voiced segment DFT');
+        end
         figure_counter = figure_counter + 1;
+        
+        if p == 8   % plot voiced/unvoiced segment dft the first time only
+            % plot signal segment dft
+            figure(figure_counter);
+            plot(abs(fft(sn)));
+            if k == 1 % for unvoiced segment
+                title('Unvoiced segment DFT');
+            else      % for voiced segment
+                title('Voiced segment DFT');
+            end
+            figure_counter = figure_counter + 1;
+        end
     end
 end
